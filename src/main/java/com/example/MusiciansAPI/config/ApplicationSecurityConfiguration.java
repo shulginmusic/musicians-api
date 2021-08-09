@@ -1,6 +1,8 @@
 package com.example.MusiciansAPI.config;
 
 import com.example.MusiciansAPI.security.CustomUserDetailsService;
+import com.example.MusiciansAPI.security.JwtAuthenticationEntryPoint;
+import com.example.MusiciansAPI.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
