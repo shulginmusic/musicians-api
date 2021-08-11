@@ -7,9 +7,9 @@ import org.hibernate.annotations.NaturalId;
 
 import javax.persistence.*;
 
-@NoArgsConstructor
 @Getter
 @Setter
+@NoArgsConstructor
 
 @Entity
 @Table(name = "roles")
@@ -27,7 +27,7 @@ public class Role {
         this.name = name;
     }
 
-    public enum  RoleName {
+    public enum RoleName {
         ROLE_USER,
         ROLE_ADMIN
     }

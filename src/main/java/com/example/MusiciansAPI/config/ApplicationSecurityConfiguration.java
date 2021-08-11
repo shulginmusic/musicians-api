@@ -1,6 +1,6 @@
 package com.example.MusiciansAPI.config;
 
-import com.example.MusiciansAPI.security.CustomUserDetailsService;
+import com.example.MusiciansAPI.service.CustomUserDetailsService;
 import com.example.MusiciansAPI.security.JwtAuthenticationEntryPoint;
 import com.example.MusiciansAPI.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 //        jsr250Enabled = true, // It enables the @RolesAllowed
 //        prePostEnabled = true //enables @PreAuthorize and @PostAuthorize
 //)
-public class ApplicationSecurityConfig  extends WebSecurityConfigurerAdapter {
+public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdapter {
 
     //Custom User Details Service
     @Autowired
@@ -88,14 +88,8 @@ public class ApplicationSecurityConfig  extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/",
                         "/h2-console",
-                        "/favicon.ico",
-                        "/**/*.png",
-                        "/**/*.gif",
-                        "/**/*.svg",
-                        "/**/*.jpg",
-                        "/**/*.html",
-                        "/**/*.css",
-                        "/**/*.js")
+                        "/auth/*"
+                        )
                 .permitAll()
                 .antMatchers("/api/auth/**")
                 .permitAll()

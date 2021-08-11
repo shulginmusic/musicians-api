@@ -1,7 +1,8 @@
-package com.example.MusiciansAPI.security;
+package com.example.MusiciansAPI.service;
 
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.repository.UserRepository;
+import com.example.MusiciansAPI.security.UserPrincipalDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
