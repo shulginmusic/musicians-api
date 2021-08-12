@@ -78,6 +78,10 @@ public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdap
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        http.authorizeRequests().antMatchers("/h2-console/**").permitAll()
+                .and().csrf().ignoringAntMatchers("/h2-console/**")
+                .and().headers().frameOptions().sameOrigin();
+
         http
                 .csrf().disable()
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler)
@@ -87,22 +91,15 @@ public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdap
                 .and()
                 .authorizeRequests()
                 .antMatchers("/",
-                        "/h2-console",
-                        "/auth/*"
+                        "/auth/**"
                         )
                 .permitAll()
-                .antMatchers("/api/auth/**")
-                .permitAll()
-                .antMatchers("/api/user/checkUsernameAvailability", "/api/user/checkEmailAvailability")
-                .permitAll()
-                .antMatchers(HttpMethod.GET, "/api/polls/**", "/api/users/**")
-                .permitAll()
-                .antMatchers( "/api/test/**")
-                .hasRole("USER")
                 .anyRequest()
                 .authenticated();
-
+        
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
+
+
 }
 

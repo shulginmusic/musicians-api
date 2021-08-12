@@ -1,6 +1,7 @@
 package com.example.MusiciansAPI;
 
 import com.example.MusiciansAPI.model.Role;
+import com.example.MusiciansAPI.repository.RoleRepository;
 import com.example.MusiciansAPI.service.RoleService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -14,13 +15,15 @@ public class MusiciansApiApplication {
 		SpringApplication.run(MusiciansApiApplication.class, args);
 	}
 
-//	@Bean
-//	CommandLineRunner runner(RoleService roleService) {
-//		return args -> {
-//
-//			roleService.create(new Role(Role.RoleName.ROLE_USER));
-//			roleService.create(new Role(Role.RoleName.ROLE_USER));
-//		};
-//	}
+	@Bean
+	CommandLineRunner runner(RoleRepository roleRepository) {
+		return args -> {
+			Role userRole = new Role(Role.RoleName.ROLE_USER);
+			Role adminRole = new Role(Role.RoleName.ROLE_ADMIN);
+
+			roleRepository.save(userRole);
+			roleRepository.save(adminRole);
+		};
+	}
 
 }

@@ -31,78 +31,22 @@ import java.util.Collections;
 public class AuthenticationController {
 
     @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    UserRepository userRepository;
-
-    @Autowired
-    RoleRepository roleRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    JwtTokenProvider tokenProvider;
-
-    @Autowired
     UserService userService;
 
     @PostMapping("/register")
     public APIResponse<User> register (@Valid @RequestBody RegistrationRequest registrationRequest) {
-        //TODO:Refactor to service
-
         var apiResponse = new APIResponse<User>();
-
         try {
             userService.registerUser(registrationRequest);
             apiResponse.setData(userService.getUserByUsername(registrationRequest.getUsername()));
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
-
-//        //TODO what is this?
-//        URI location = ServletUriComponentsBuilder
-//                .fromCurrentContextPath().path("/api/users/{username}")
-//                .buildAndExpand(result.getUsername()).toUri();
         return apiResponse;
-
-//        //TODO:Refactor to service
-//
-//        //Username taken
-//        if (userRepository.existsByUsername(RegistrationRequest.getUsername())) {
-//            return new ResponseEntity(new ApiResponse(false, "Username is already taken!"),
-//                    HttpStatus.BAD_REQUEST);
-//        }
-//
-//        //Email taken
-//        if(userRepository.existsByEmail(signUpRequest.getEmail())) {
-//            return new ResponseEntity(new ApiResponse(false, "Email Address already in use!"),
-//                    HttpStatus.BAD_REQUEST);
-//        }
-//
-//        //Create new user
-//        User user = new User(signUpRequest.getName(), signUpRequest.getUsername(),
-//                signUpRequest.getEmail(), signUpRequest.getPassword());
-//
-//        //Encode password
-//        user.setPassword(passwordEncoder.encode(user.getPassword()));
-//
-//        //Set user role
-//        Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
-//                .orElseThrow(() -> new AppException("No user role set"));
-//        user.setRoles(Collections.singleton(userRole));
-//
-//        User result = userRepository.save(user);
-//
-//        //TODO what is this?
-//        URI location = ServletUriComponentsBuilder
-//                .fromCurrentContextPath().path("/api/users/{username}")
-//                .buildAndExpand(result.getUsername()).toUri();
-//
-//        return ResponseEntity.created(location).body(new ApiResponse(true, "User Registration OK"));
-
     }
+
+//    @PostMapping("/signin")
+//    public APIResponse<>
 }
 
 
