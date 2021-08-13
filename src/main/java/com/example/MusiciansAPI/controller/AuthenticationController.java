@@ -1,7 +1,5 @@
 package com.example.MusiciansAPI.controller;
 
-//Controller for login / registration
-
 import com.example.MusiciansAPI.model.APIResponse;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
@@ -26,6 +24,9 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.util.Collections;
 
+/**
+ * Login + Registration Controller
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthenticationController {
@@ -33,20 +34,23 @@ public class AuthenticationController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
     @PostMapping("/register")
     public APIResponse<User> register (@Valid @RequestBody RegistrationRequest registrationRequest) {
         var apiResponse = new APIResponse<User>();
+
         try {
             userService.registerUser(registrationRequest);
-            apiResponse.setData(userService.getUserByUsername(registrationRequest.getUsername()));
+            apiResponse.setData(userService.getUserInResponse(registrationRequest));
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
+        
         return apiResponse;
     }
 
-//    @PostMapping("/signin")
-//    public APIResponse<>
 }
 
 

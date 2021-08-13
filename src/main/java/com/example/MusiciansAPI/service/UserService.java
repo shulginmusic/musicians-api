@@ -62,6 +62,30 @@ public class UserService {
         return userRepository.findByUsername(username).get();
     }
 
+    /**
+     * This method is used for returning a user with a decoded password
+     * @param registrationRequest
+     * @return User with decoded password (the password stays encoded in the database)
+     * @throws Exception if password and the encoded password don't match
+     */
+    public User getUserInResponse(RegistrationRequest registrationRequest) throws Exception{
+
+        //Get the user to return in response
+        var userInResponse = getUserByUsername(registrationRequest.getUsername());
+
+        //Obtain the decoded password
+        var decodedPassword = registrationRequest.getPassword();
+
+        //Make sure the password matches with the BCrypt Encoded password
+        if (passwordEncoder.matches(decodedPassword, userInResponse.getPassword())) {
+            //Set the decoded password to display in response
+            userInResponse.setPassword(decodedPassword);
+        } else {
+            throw new Exception("Password encoding failed.");
+        }
+        return userInResponse;
+    }
+
     public void checkIfUsernameTaken(String username) throws Exception {
         if (userRepository.existsByUsername(username)){
             throw new Exception("Username " + username + " already taken!");
