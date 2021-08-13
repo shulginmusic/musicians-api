@@ -2,7 +2,9 @@ package com.example.MusiciansAPI.controller;
 
 import com.example.MusiciansAPI.model.APIResponse;
 import com.example.MusiciansAPI.model.User;
+import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
+import com.example.MusiciansAPI.payload.request.response.JwtAuthenticationResponse;
 import com.example.MusiciansAPI.repository.RoleRepository;
 import com.example.MusiciansAPI.repository.UserRepository;
 import com.example.MusiciansAPI.security.JwtTokenProvider;
@@ -12,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,7 +33,7 @@ import java.util.Collections;
  * Login + Registration Controller
  */
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("api/auth")
 public class AuthenticationController {
 
     @Autowired
@@ -37,8 +42,14 @@ public class AuthenticationController {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    JwtTokenProvider tokenProvider;
+
     @PostMapping("/register")
-    public APIResponse<User> register (@Valid @RequestBody RegistrationRequest registrationRequest) {
+    public APIResponse<User> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
         var apiResponse = new APIResponse<User>();
 
         try {
@@ -47,7 +58,28 @@ public class AuthenticationController {
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
-        
+
+        return apiResponse;
+    }
+
+    @PostMapping("/login")
+    public APIResponse<?> loginUserAuthentication(@Valid @RequestBody LoginRequest loginRequest) {
+        var apiResponse = new APIResponse<String>();
+        //Auth object
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsernameOrEmail(),
+                        loginRequest.getPassword()
+                )
+        );
+
+        //Set auth
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        //Generate jwt
+        String jwt = tokenProvider.generateToken(authentication);
+
+        apiResponse.setData(jwt);
         return apiResponse;
     }
 

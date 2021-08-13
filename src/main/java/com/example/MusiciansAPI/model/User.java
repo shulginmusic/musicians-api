@@ -1,6 +1,7 @@
 package com.example.MusiciansAPI.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.NaturalId;
 import javax.persistence.*;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 @Getter
 @Setter
+@NoArgsConstructor
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
