@@ -4,10 +4,12 @@ import com.example.MusiciansAPI.model.APIResponse;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
+import com.example.MusiciansAPI.payload.request.TokenRefreshRequest;
 import com.example.MusiciansAPI.payload.request.response.JwtAuthenticationResponse;
 import com.example.MusiciansAPI.repository.RoleRepository;
 import com.example.MusiciansAPI.repository.UserRepository;
 import com.example.MusiciansAPI.security.JwtTokenProvider;
+import com.example.MusiciansAPI.service.RefreshTokenService;
 import com.example.MusiciansAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -40,13 +42,13 @@ public class AuthenticationController {
     UserService userService;
 
     @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
     AuthenticationManager authenticationManager;
 
     @Autowired
     JwtTokenProvider tokenProvider;
+
+    @Autowired
+    RefreshTokenService refreshTokenService;
 
     @PostMapping("/register")
     public APIResponse<User> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
@@ -82,6 +84,27 @@ public class AuthenticationController {
         apiResponse.setData(jwt);
         return apiResponse;
     }
+
+    @PostMapping("/refreshtoken")
+    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+        String refreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtUtils.generateTokenFromUsername(user.getUsername());
+                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
+    }
+
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logoutUser(@Valid @RequestBody LogOutRequest logOutRequest) {
+//        refreshTokenService.deleteByUserId(logOutRequest.getUserId());
+//        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
+//    }
 
 }
 
