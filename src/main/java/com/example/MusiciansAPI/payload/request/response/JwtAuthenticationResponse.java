@@ -1,12 +1,11 @@
 package com.example.MusiciansAPI.payload.request.response;
 
+import com.example.MusiciansAPI.model.User;
+import lombok.Data;
+
+@Data
 public class JwtAuthenticationResponse {
 
     private String refreshToken;
-    private String accessToken;
-    private String tokenType = "Bearer";
-
-    public JwtAuthenticationResponse(String accessToken) {
-        this.accessToken = accessToken;
-    }
+    private User user;
 }

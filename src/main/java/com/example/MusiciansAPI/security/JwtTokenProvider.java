@@ -41,6 +41,21 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    public String generateToken(Long id) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
+
+        /**
+         * Build JWT Token
+         */
+        return Jwts.builder()
+                .setSubject(Long.toString(id))
+                .setIssuedAt(new Date())
+                .setExpiration(expiryDate)
+                .signWith(SignatureAlgorithm.HS512, jwtSecret)
+                .compact();
+    }
+
     /**
      * Get Id from JWT
      * @param token

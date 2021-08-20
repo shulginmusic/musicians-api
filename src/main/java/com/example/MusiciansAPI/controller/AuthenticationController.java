@@ -1,38 +1,36 @@
 package com.example.MusiciansAPI.controller;
 
+import com.example.MusiciansAPI.exception.TokenRefreshException;
 import com.example.MusiciansAPI.model.APIResponse;
+import com.example.MusiciansAPI.model.RefreshToken;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
 import com.example.MusiciansAPI.payload.request.TokenRefreshRequest;
 import com.example.MusiciansAPI.payload.request.response.JwtAuthenticationResponse;
-import com.example.MusiciansAPI.repository.RoleRepository;
-import com.example.MusiciansAPI.repository.UserRepository;
 import com.example.MusiciansAPI.security.JwtTokenProvider;
-import com.example.MusiciansAPI.service.RefreshTokenService;
+import com.example.MusiciansAPI.security.service.RefreshTokenService;
 import com.example.MusiciansAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 
 import javax.validation.Valid;
-import java.net.URI;
-import java.util.Collections;
+import javax.validation.constraints.NotBlank;
+
 
 /**
  * Login + Registration Controller
+ *
+ * Ref: https://github.com/bezkoder/spring-boot-refresh-token-jwt
  */
 @RestController
 @RequestMapping("api/auth")
@@ -50,13 +48,25 @@ public class AuthenticationController {
     @Autowired
     RefreshTokenService refreshTokenService;
 
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+    private @NotBlank String refreshToken;
+
+
     @PostMapping("/register")
-    public APIResponse<User> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        var apiResponse = new APIResponse<User>();
+    public APIResponse<JwtAuthenticationResponse> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        var apiResponse = new APIResponse<JwtAuthenticationResponse>();
+        var jwtResponse = new JwtAuthenticationResponse();
 
         try {
             userService.registerUser(registrationRequest);
-            apiResponse.setData(userService.getUserInResponse(registrationRequest));
+
+            var userInResponse = userService.getUserInResponse(registrationRequest);
+            var refreshToken = refreshTokenService.findByUser(userInResponse);
+            jwtResponse.setRefreshToken(refreshToken.get().getToken());
+            jwtResponse.setUser(userInResponse);
+            apiResponse.setData(jwtResponse);
+
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
@@ -86,18 +96,24 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refreshtoken")
-    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
-        String refreshToken = request.getRefreshToken();
+    public APIResponse<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+        var apiResponse = new APIResponse<String>();
 
-        return refreshTokenService.findByToken(requestRefreshToken)
+        refreshToken = request.getRefreshToken();
+        return refreshTokenService.findByToken(refreshToken)
+                //verify expiration
                 .map(refreshTokenService::verifyExpiration)
+                //verify token is assigned to a user
                 .map(RefreshToken::getUser)
+                //Generate new access token
                 .map(user -> {
-                    String token = jwtUtils.generateTokenFromUsername(user.getUsername());
-                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+                    String newAccessToken = jwtTokenProvider.generateToken(user.getId());
+                    apiResponse.setData(newAccessToken);
+                    return apiResponse;
                 })
-                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                .orElseThrow(() -> new TokenRefreshException(refreshToken,
                         "Refresh token is not in database!"));
+
     }
 
 //    @PostMapping("/logout")

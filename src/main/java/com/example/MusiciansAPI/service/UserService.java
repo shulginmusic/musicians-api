@@ -6,6 +6,7 @@ import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
 import com.example.MusiciansAPI.repository.RoleRepository;
 import com.example.MusiciansAPI.repository.UserRepository;
+import com.example.MusiciansAPI.security.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,13 +23,13 @@ public class UserService {
     UserRepository userRepository;
 
     @Autowired
-    RoleService roleService;
-
-    @Autowired
     RoleRepository roleRepository;
 
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    RefreshTokenService refreshTokenService;
 
     public void registerUser(RegistrationRequest registrationRequest) throws Exception {
         //Check if username / email is already taken
@@ -42,15 +43,13 @@ public class UserService {
         //Encode password
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        //Set user role
-//        Optional<Role> userRole = roleRepository.findByName(Role.RoleName.ROLE_USER);
-//        user.setRoles(Collections.singleton(userRole.get()));
-
         Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
                 .orElseThrow(() -> new AppException("No user role set"));
         user.setRoles(Collections.singleton(userRole));
 
         userRepository.save(user);
+
+        refreshTokenService.createRefreshToken(user.getId());
 
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/api/users/{username}")
@@ -86,13 +85,15 @@ public class UserService {
         return userInResponse;
     }
 
-    public void checkIfUsernameTaken(String username) throws Exception {
+    //Helper Methods
+
+    private void checkIfUsernameTaken(String username) throws Exception {
         if (userRepository.existsByUsername(username)){
             throw new Exception("Username " + username + " already taken!");
         }
     }
 
-    public void checkIfEmailTaken(String email) throws Exception {
+    private void checkIfEmailTaken(String email) throws Exception {
         if (userRepository.existsByEmail(email)) {
             throw new Exception("Email " + email + " already taken!");
         }

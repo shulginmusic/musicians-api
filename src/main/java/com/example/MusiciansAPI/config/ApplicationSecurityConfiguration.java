@@ -95,6 +95,8 @@ public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdap
                         "/api/auth/**"
                         )
                 .permitAll()
+                .antMatchers( "/api/protected/**")
+                .hasRole("USER")
                 .anyRequest()
                 .authenticated();
         
