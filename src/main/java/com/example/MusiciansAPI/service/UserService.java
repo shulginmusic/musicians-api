@@ -64,6 +64,11 @@ public class UserService {
 
     }
 
+    /**
+     * Authenticate (login)
+     * @param loginRequest
+     * @return A JwtAuthenticationResponse with refresh token, access token, and user with a decoded password
+     */
     public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) throws Exception {
         var jwtResponse = new JwtAuthenticationResponse();
         var user = getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
@@ -78,9 +83,6 @@ public class UserService {
         //Set auth
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        //Generate jwt
-        String jwt = jwtTokenProvider.generateToken(authentication);
-
         //Just delete the old and create a new refresh token
         // (alternatively you could check the refresh token's expiration and
         // keep it the same, but I personally believe that with each new login comes a new refresh token)
@@ -90,12 +92,20 @@ public class UserService {
         //Create brand new refresh token
         refreshTokenService.createRefreshToken(user.getId());
 
+        //Generate jwt and set it in response
+        String jwtToken = jwtTokenProvider.generateToken(authentication);
+
+        //JwtAuthenticationResponse consists of: refresh token(String only), access token and user object
+        //Let's set those three
+
+        //Set the refresh token String
         var refreshToken = refreshTokenService.findByUser(user);
         jwtResponse.setRefreshToken(refreshToken.get().getToken());
-        jwtResponse.setUser(getUserInResponse(loginRequest));
 
-        //Generate jwt
-        String jwtToken = jwtTokenProvider.generateToken(authentication);
+        //Set user in response
+        jwtResponse.setUser(getUserInResponse(loginRequest)); //Return user with a decoded password for demonstration purposes
+
+        //Set access token
         jwtResponse.setAccessToken(jwtToken);
 
         return jwtResponse;
