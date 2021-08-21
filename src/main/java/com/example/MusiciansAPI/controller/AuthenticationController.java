@@ -52,21 +52,23 @@ public class AuthenticationController {
     JwtTokenProvider jwtTokenProvider;
     private @NotBlank String refreshToken;
 
-
+    /**
+     * Registration method
+     *
+     * @param registrationRequest
+     * @return API response with user with a decoded password for demonstration purposes
+     */
     @PostMapping("/register")
-    public APIResponse<JwtAuthenticationResponse> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
-        var apiResponse = new APIResponse<JwtAuthenticationResponse>();
-        var jwtResponse = new JwtAuthenticationResponse();
-
+    public APIResponse<User> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        var apiResponse = new APIResponse<User>();
+//        var jwtResponse = new JwtAuthenticationResponse();
         try {
             userService.registerUser(registrationRequest);
-
             var userInResponse = userService.getUserInResponse(registrationRequest);
-            var refreshToken = refreshTokenService.findByUser(userInResponse);
-            jwtResponse.setRefreshToken(refreshToken.get().getToken());
-            jwtResponse.setUser(userInResponse);
-            apiResponse.setData(jwtResponse);
-
+//            var refreshToken = refreshTokenService.findByUser(userInResponse);
+//            jwtResponse.setRefreshToken(refreshToken.get().getToken());
+//            jwtResponse.setUser(userInResponse);
+            apiResponse.setData(userInResponse);
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
@@ -75,8 +77,10 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public APIResponse<?> loginUserAuthentication(@Valid @RequestBody LoginRequest loginRequest) {
-        var apiResponse = new APIResponse<String>();
+    public APIResponse<JwtAuthenticationResponse> loginUserAuthentication(@Valid @RequestBody LoginRequest loginRequest) {
+        var apiResponse = new APIResponse<JwtAuthenticationResponse>();
+        var jwtResponse = new JwtAuthenticationResponse();
+
         //Auth object
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -88,10 +92,20 @@ public class AuthenticationController {
         //Set auth
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        //Generate jwt
-        String jwt = tokenProvider.generateToken(authentication);
+        //Create new refresh token
+        var user = userService.getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
+        refreshTokenService.createRefreshToken(user.getId());
 
-        apiResponse.setData(jwt);
+        //Show token in response
+        var refreshToken = refreshTokenService.findByUser(user);
+        jwtResponse.setRefreshToken(refreshToken.get().getToken());
+        jwtResponse.setUser(user);
+
+        //Generate jwt
+        String jwtToken = tokenProvider.generateToken(authentication);
+        jwtResponse.setAccessToken(jwtToken);
+
+        apiResponse.setData(jwtResponse);
         return apiResponse;
     }
 
