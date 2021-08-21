@@ -40,17 +40,10 @@ public class AuthenticationController {
     UserService userService;
 
     @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    JwtTokenProvider tokenProvider;
-
-    @Autowired
     RefreshTokenService refreshTokenService;
 
     @Autowired
     JwtTokenProvider jwtTokenProvider;
-    private @NotBlank String refreshToken;
 
     /**
      * Registration method
@@ -62,10 +55,7 @@ public class AuthenticationController {
     public APIResponse<User> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
         var apiResponse = new APIResponse<User>();
         try {
-            userService.registerUser(registrationRequest);
-            //userInResponse shows a decoded password
-            var userInResponse = userService.getUserInResponse(registrationRequest);
-            apiResponse.setData(userInResponse);
+            apiResponse.setData(userService.registerUser(registrationRequest));
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
