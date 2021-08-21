@@ -119,13 +119,6 @@ public class UserService {
         return jwtResponse;
     }
 
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username).get();
-    }
-    public User getUserByUsernameOrEmail(String usernameOrEmail) {
-        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).get();
-    }
-
     /**
      * This method is used for returning a user with a decoded password
      * @param registrationRequest
@@ -149,7 +142,7 @@ public class UserService {
         return userInResponse;
     }
 
-    //Another method signature for login
+    //Another method signature for login request
     public User getUserInResponse(LoginRequest loginRequest) throws Exception{
 
         //Get the user to return in response
@@ -180,5 +173,13 @@ public class UserService {
         if (userRepository.existsByEmail(email)) {
             throw new Exception("Email " + email + " already taken!");
         }
+    }
+
+    //Repo Getter methods
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username).get();
+    }
+    public User getUserByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).get();
     }
 }

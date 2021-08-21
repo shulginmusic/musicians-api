@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 
 
 /**
@@ -60,6 +59,10 @@ public class AuthenticationController {
         return apiResponse;
     }
 
+    /**
+     * Login method
+     * @return API response with JwtAuthenticationResponse that includes the refresh, access tokens and a user "in response"
+     */
     @PostMapping("/login")
     public APIResponse<JwtAuthenticationResponse> loginUserAuthentication(@Valid @RequestBody LoginRequest loginRequest) {
         var apiResponse = new APIResponse<JwtAuthenticationResponse>();
@@ -71,6 +74,11 @@ public class AuthenticationController {
         return apiResponse;
     }
 
+    /**
+     * Refresh access token method
+     * @param request provide the refresh token (token should be valid and non-expired)
+     * @return new access token
+     */
     @PostMapping("/refresh-access")
     public APIResponse<String> refreshAccess(@Valid @RequestBody TokenRefreshRequest request) {
         var apiResponse = new APIResponse<String>();

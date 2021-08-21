@@ -40,17 +40,30 @@ public class RefreshTokenService {
         return refreshTokenRepository.findByUser(user);
     }
 
+    /**
+     * Create new refresh token
+     * @param userId
+     * @return Refresh token ***object*** (not String)
+     */
     public RefreshToken createRefreshToken(Long userId) {
         var refreshToken = new RefreshToken();
 
+        //Set refresh token object data
         refreshToken.setUser(userRepository.findById(userId).get());
         refreshToken.setExpiryDate(Instant.now().plusMillis(refreshTokenDurationMs));
         refreshToken.setToken(UUID.randomUUID().toString());
 
+        //Save to repo
         refreshToken = refreshTokenRepository.save(refreshToken);
+
         return refreshToken;
     }
 
+    /**
+     * Check provided refresh token and return a new access token upon success
+     * @param request should include a valid, non-expired refresh token
+     * @return new access token
+     */
     public String refreshAccessToken(TokenRefreshRequest request) {
         //Verify token exists & not expired
         var refreshToken = findByToken(request.getRefreshToken()).get();
@@ -61,14 +74,20 @@ public class RefreshTokenService {
         return jwtTokenProvider.generateToken(user.getId());
     }
 
-    public void verifyThatExists(String token) {
+    /**
+     * Helper method: verifies that a token exists
+     */
+    private void verifyThatExists(String token) {
         if (refreshTokenRepository.findByToken(token).isEmpty()) {
             throw new TokenRefreshException(token, "This Refresh token " +
                     " isn't assigned to a user. Please login and try again using new refresh access token");
         }
     }
 
-    public void verifyExpiration(String token) {
+    /**
+     * Helper method: verifies whether a token is expired
+     */
+    private void verifyExpiration(String token) {
         RefreshToken refreshToken = findByToken(token).get();
         if (refreshToken.getExpiryDate().compareTo(Instant.now()) < 0) {
             refreshTokenRepository.delete(refreshToken);
@@ -77,8 +96,12 @@ public class RefreshTokenService {
         }
     }
 
+    /**
+     * Delete a token by a user id
+     * @param userId
+     */
     @Transactional
-    public int deleteByUserId(Long userId) {
-        return refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
+    public void deleteByUserId(Long userId) {
+        refreshTokenRepository.deleteByUser(userRepository.findById(userId).get());
     }
 }
