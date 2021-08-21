@@ -109,8 +109,8 @@ public class AuthenticationController {
         return apiResponse;
     }
 
-    @PostMapping("/refreshtoken")
-    public APIResponse<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+    @PostMapping("/refresh-access")
+    public APIResponse<?> refreshAccess(@Valid @RequestBody TokenRefreshRequest request) {
         var apiResponse = new APIResponse<String>();
 
         refreshToken = request.getRefreshToken();
@@ -127,7 +127,6 @@ public class AuthenticationController {
                 })
                 .orElseThrow(() -> new TokenRefreshException(refreshToken,
                         "Refresh token is not in database!"));
-
     }
 
 //    @PostMapping("/logout")
