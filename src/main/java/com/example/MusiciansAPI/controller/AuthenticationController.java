@@ -29,8 +29,6 @@ import javax.validation.constraints.NotBlank;
 
 /**
  * Login + Registration Controller
- *
- * Ref: https://github.com/bezkoder/spring-boot-refresh-token-jwt
  */
 @RestController
 @RequestMapping("api/auth")
@@ -74,42 +72,15 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh-access")
-    public APIResponse<?> refreshAccess(@Valid @RequestBody TokenRefreshRequest request) {
+    public APIResponse<String> refreshAccess(@Valid @RequestBody TokenRefreshRequest request) {
         var apiResponse = new APIResponse<String>();
-        var refreshToken = request.getRefreshToken();
-
         try {
-            //Verify token exists & not expired
-            RefreshToken refreshTokenObject = refreshTokenService.findByToken(refreshToken).get();
-            refreshTokenService.verifyExpiration(refreshToken);
-
-            //Generate new access token
-            var user = refreshTokenObject.getUser();
-            var newAccessToken = jwtTokenProvider.generateToken(user.getId());
-
-            apiResponse.setData(newAccessToken);
-
+            apiResponse.setData(refreshTokenService.refreshAccessToken(request));
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
         return apiResponse;
     }
-
-
-//        return refreshTokenService.findByToken(refreshToken)
-//                //verify expiration
-//                .map(refreshTokenService::verifyExpiration)
-//                //verify token is assigned to a user
-//                .map(RefreshToken::getUser)
-//                //Generate new access token
-//                .map(user -> {
-//                    String newAccessToken = jwtTokenProvider.generateToken(user.getId());
-//                    apiResponse.setData(newAccessToken);
-//                    return apiResponse;
-//                })
-//                .orElseThrow(() -> new TokenRefreshException(refreshToken,
-//                        "Refresh token is not in database!"));
-
 
 //    @PostMapping("/logout")
 //    public ResponseEntity<?> logoutUser(@Valid @RequestBody LogOutRequest logOutRequest) {
