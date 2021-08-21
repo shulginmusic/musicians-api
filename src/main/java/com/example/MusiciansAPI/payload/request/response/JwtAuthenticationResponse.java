@@ -8,4 +8,5 @@ public class JwtAuthenticationResponse {
 
     private String refreshToken;
     private User user;
+    private String accessToken;
 }

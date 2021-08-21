@@ -3,11 +3,16 @@ package com.example.MusiciansAPI.service;
 import com.example.MusiciansAPI.exception.AppException;
 import com.example.MusiciansAPI.model.Role;
 import com.example.MusiciansAPI.model.User;
+import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
 import com.example.MusiciansAPI.repository.RoleRepository;
 import com.example.MusiciansAPI.repository.UserRepository;
 import com.example.MusiciansAPI.security.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -31,6 +36,9 @@ public class UserService {
     @Autowired
     RefreshTokenService refreshTokenService;
 
+    @Autowired
+    AuthenticationManager authenticationManager;
+
     public void registerUser(RegistrationRequest registrationRequest) throws Exception {
         //Check if username / email is already taken
         checkIfUsernameTaken(registrationRequest.getUsername());
@@ -49,16 +57,29 @@ public class UserService {
 
         userRepository.save(user);
 
-        refreshTokenService.createRefreshToken(user.getId());
-
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentContextPath().path("/api/users/{username}")
-                .buildAndExpand(user.getUsername()).toUri();
-
     }
+
+//    public String authenticateUser(LoginRequest loginRequest) {
+//
+//        //Auth object
+//        Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        loginRequest.getUsernameOrEmail(),
+//                        loginRequest.getPassword()
+//                )
+//        );
+//        //Set auth
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+//
+//        //Generate jwt
+//        String jwt = tokenProvider.generateToken(authentication);
+//    }
 
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username).get();
+    }
+    public User getUserByUsernameOrEmail(String usernameOrEmail) {
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).get();
     }
 
     /**
