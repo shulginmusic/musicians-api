@@ -76,6 +76,7 @@ public class AuthenticationController {
         return apiResponse;
     }
 
+    //TODO: refactor, or should I ? 
     @PostMapping("/login")
     public APIResponse<JwtAuthenticationResponse> loginUserAuthentication(@Valid @RequestBody LoginRequest loginRequest) {
         var apiResponse = new APIResponse<JwtAuthenticationResponse>();
@@ -119,29 +120,46 @@ public class AuthenticationController {
     @PostMapping("/refresh-access")
     public APIResponse<?> refreshAccess(@Valid @RequestBody TokenRefreshRequest request) {
         var apiResponse = new APIResponse<String>();
+        var refreshToken = request.getRefreshToken();
 
-        refreshToken = request.getRefreshToken();
-        return refreshTokenService.findByToken(refreshToken)
-                //verify expiration
-                .map(refreshTokenService::verifyExpiration)
-                //verify token is assigned to a user
-                .map(RefreshToken::getUser)
-                //Generate new access token
-                .map(user -> {
-                    String newAccessToken = jwtTokenProvider.generateToken(user.getId());
-                    apiResponse.setData(newAccessToken);
-                    return apiResponse;
-                })
-                .orElseThrow(() -> new TokenRefreshException(refreshToken,
-                        "Refresh token is not in database!"));
+        try {
+            //Verify token exists & not expired
+            RefreshToken refreshTokenObject = refreshTokenService.findByToken(refreshToken).get();
+            refreshTokenService.verifyExpiration(refreshToken);
+
+            //Generate new access token
+            var user = refreshTokenObject.getUser();
+            var newAccessToken = jwtTokenProvider.generateToken(user.getId());
+
+            apiResponse.setData(newAccessToken);
+
+        } catch (Exception exc) {
+            apiResponse.setError(exc.getMessage());
+        }
+        return apiResponse;
     }
+
+
+//        return refreshTokenService.findByToken(refreshToken)
+//                //verify expiration
+//                .map(refreshTokenService::verifyExpiration)
+//                //verify token is assigned to a user
+//                .map(RefreshToken::getUser)
+//                //Generate new access token
+//                .map(user -> {
+//                    String newAccessToken = jwtTokenProvider.generateToken(user.getId());
+//                    apiResponse.setData(newAccessToken);
+//                    return apiResponse;
+//                })
+//                .orElseThrow(() -> new TokenRefreshException(refreshToken,
+//                        "Refresh token is not in database!"));
+
 
 //    @PostMapping("/logout")
 //    public ResponseEntity<?> logoutUser(@Valid @RequestBody LogOutRequest logOutRequest) {
 //        refreshTokenService.deleteByUserId(logOutRequest.getUserId());
 //        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
 //    }
-
 }
 
 
