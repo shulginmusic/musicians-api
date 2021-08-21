@@ -26,13 +26,12 @@ public class RefreshTokenService {
     private UserRepository userRepository;
 
     public Optional<RefreshToken> findByToken(String token) {
+        //verify that suck token exists in DB
         verifyThatExists(token);
         return refreshTokenRepository.findByToken(token);
     }
 
     public Optional<RefreshToken> findByUser(User user) {
-        //TODO: fix the verification: weird exception thrown
-//        verifyThatExists(user);
         return refreshTokenRepository.findByUser(user);
     }
 
@@ -53,14 +52,6 @@ public class RefreshTokenService {
                     " isn't assigned to a user. Please login and try again using new refresh access token");
         }
     }
-
-    //TODO: fix this method signature
-//    public void verifyThatExists(User user) {
-//        if (refreshTokenRepository.findByUser(user).isEmpty()) {
-//            throw new TokenRefreshException(user.getUsername(), "This Refresh token " +
-//                    " isn't assigned to a user. Please login and try again using new refresh access token");
-//        }
-//    }
 
     public void verifyExpiration(String token) {
         RefreshToken refreshToken = findByToken(token).get();

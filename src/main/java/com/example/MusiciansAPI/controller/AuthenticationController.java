@@ -61,59 +61,25 @@ public class AuthenticationController {
     @PostMapping("/register")
     public APIResponse<User> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
         var apiResponse = new APIResponse<User>();
-//        var jwtResponse = new JwtAuthenticationResponse();
         try {
             userService.registerUser(registrationRequest);
+            //userInResponse shows a decoded password
             var userInResponse = userService.getUserInResponse(registrationRequest);
-//            var refreshToken = refreshTokenService.findByUser(userInResponse);
-//            jwtResponse.setRefreshToken(refreshToken.get().getToken());
-//            jwtResponse.setUser(userInResponse);
             apiResponse.setData(userInResponse);
         } catch (Exception exc) {
             apiResponse.setError(exc.getMessage());
         }
-
         return apiResponse;
     }
 
-    //TODO: refactor, or should I ? 
     @PostMapping("/login")
     public APIResponse<JwtAuthenticationResponse> loginUserAuthentication(@Valid @RequestBody LoginRequest loginRequest) {
         var apiResponse = new APIResponse<JwtAuthenticationResponse>();
-        var jwtResponse = new JwtAuthenticationResponse();
-
-        var user = userService.getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
-
-        //Auth object
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsernameOrEmail(),
-                        loginRequest.getPassword()
-                )
-        );
-
-        //Set auth
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        //Just delete the old and create a new refresh token
-        // (alternatively you could check the refresh token's expiration and
-        // keep it the same, but I personally believe that with each new login comes a new refresh token)
-        if (refreshTokenService.findByUser(user).isPresent()) {
-            refreshTokenService.deleteByUserId(user.getId());
+        try {
+            apiResponse.setData(userService.authenticateUser(loginRequest));
+        } catch (Exception exc) {
+            apiResponse.setError(exc.getMessage());
         }
-        //Create brand new refresh token
-        refreshTokenService.createRefreshToken(user.getId());
-
-        //Show token in response
-        var refreshToken = refreshTokenService.findByUser(user);
-        jwtResponse.setRefreshToken(refreshToken.get().getToken());
-        jwtResponse.setUser(user);
-
-        //Generate jwt
-        String jwtToken = tokenProvider.generateToken(authentication);
-        jwtResponse.setAccessToken(jwtToken);
-
-        apiResponse.setData(jwtResponse);
         return apiResponse;
     }
 

@@ -5,8 +5,10 @@ import com.example.MusiciansAPI.model.Role;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
+import com.example.MusiciansAPI.payload.request.response.JwtAuthenticationResponse;
 import com.example.MusiciansAPI.repository.RoleRepository;
 import com.example.MusiciansAPI.repository.UserRepository;
+import com.example.MusiciansAPI.security.JwtTokenProvider;
 import com.example.MusiciansAPI.security.service.RefreshTokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -39,6 +41,9 @@ public class UserService {
     @Autowired
     AuthenticationManager authenticationManager;
 
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
     public void registerUser(RegistrationRequest registrationRequest) throws Exception {
         //Check if username / email is already taken
         checkIfUsernameTaken(registrationRequest.getUsername());
@@ -59,21 +64,42 @@ public class UserService {
 
     }
 
-//    public String authenticateUser(LoginRequest loginRequest) {
-//
-//        //Auth object
-//        Authentication authentication = authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        loginRequest.getUsernameOrEmail(),
-//                        loginRequest.getPassword()
-//                )
-//        );
-//        //Set auth
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-//
-//        //Generate jwt
-//        String jwt = tokenProvider.generateToken(authentication);
-//    }
+    public JwtAuthenticationResponse authenticateUser(LoginRequest loginRequest) throws Exception {
+        var jwtResponse = new JwtAuthenticationResponse();
+        var user = getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
+
+        //Auth object
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        loginRequest.getUsernameOrEmail(),
+                        loginRequest.getPassword()
+                )
+        );
+        //Set auth
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        //Generate jwt
+        String jwt = jwtTokenProvider.generateToken(authentication);
+
+        //Just delete the old and create a new refresh token
+        // (alternatively you could check the refresh token's expiration and
+        // keep it the same, but I personally believe that with each new login comes a new refresh token)
+        if (refreshTokenService.findByUser(user).isPresent()) {
+            refreshTokenService.deleteByUserId(user.getId());
+        }
+        //Create brand new refresh token
+        refreshTokenService.createRefreshToken(user.getId());
+
+        var refreshToken = refreshTokenService.findByUser(user);
+        jwtResponse.setRefreshToken(refreshToken.get().getToken());
+        jwtResponse.setUser(getUserInResponse(loginRequest));
+
+        //Generate jwt
+        String jwtToken = jwtTokenProvider.generateToken(authentication);
+        jwtResponse.setAccessToken(jwtToken);
+
+        return jwtResponse;
+    }
 
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username).get();
@@ -89,12 +115,30 @@ public class UserService {
      * @throws Exception if password and the encoded password don't match
      */
     public User getUserInResponse(RegistrationRequest registrationRequest) throws Exception{
-
         //Get the user to return in response
         var userInResponse = getUserByUsername(registrationRequest.getUsername());
 
         //Obtain the decoded password
         var decodedPassword = registrationRequest.getPassword();
+
+        //Make sure the password matches with the BCrypt Encoded password
+        if (passwordEncoder.matches(decodedPassword, userInResponse.getPassword())) {
+            //Set the decoded password to display in response
+            userInResponse.setPassword(decodedPassword);
+        } else {
+            throw new Exception("Password encoding failed.");
+        }
+        return userInResponse;
+    }
+
+    //Another method signature for login
+    public User getUserInResponse(LoginRequest loginRequest) throws Exception{
+
+        //Get the user to return in response
+        var userInResponse = getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
+
+        //Obtain the decoded password
+        var decodedPassword = loginRequest.getPassword();
 
         //Make sure the password matches with the BCrypt Encoded password
         if (passwordEncoder.matches(decodedPassword, userInResponse.getPassword())) {
