@@ -81,6 +81,8 @@ public class AuthenticationController {
         var apiResponse = new APIResponse<JwtAuthenticationResponse>();
         var jwtResponse = new JwtAuthenticationResponse();
 
+        var user = userService.getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
+
         //Auth object
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -92,8 +94,13 @@ public class AuthenticationController {
         //Set auth
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        //Create new refresh token
-        var user = userService.getUserByUsernameOrEmail(loginRequest.getUsernameOrEmail());
+        //Just delete the old and create a new refresh token
+        // (alternatively you could check the refresh token's expiration and
+        // keep it the same, but I personally believe that with each new login comes a new refresh token)
+        if (refreshTokenService.findByUser(user).isPresent()) {
+            refreshTokenService.deleteByUserId(user.getId());
+        }
+        //Create brand new refresh token
         refreshTokenService.createRefreshToken(user.getId());
 
         //Show token in response
