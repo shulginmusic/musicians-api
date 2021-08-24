@@ -1,8 +1,6 @@
 package com.example.MusiciansAPI.controller;
 
-import com.example.MusiciansAPI.exception.TokenRefreshException;
 import com.example.MusiciansAPI.model.APIResponse;
-import com.example.MusiciansAPI.model.RefreshToken;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;
@@ -13,14 +11,7 @@ import com.example.MusiciansAPI.security.service.RefreshTokenService;
 import com.example.MusiciansAPI.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 import javax.validation.Valid;
@@ -90,11 +81,17 @@ public class AuthenticationController {
         return apiResponse;
     }
 
-//    @PostMapping("/logout")
-//    public ResponseEntity<?> logoutUser(@Valid @RequestBody LogOutRequest logOutRequest) {
-//        refreshTokenService.deleteByUserId(logOutRequest.getUserId());
-//        return ResponseEntity.ok(new MessageResponse("Log out successful!"));
-//    }
+    @PostMapping("/logout/{id}")
+    public APIResponse<String> logoutUser(@PathVariable long id) {
+        var apiResponse = new APIResponse<String>();
+        try {
+            refreshTokenService.deleteByUserId(id);
+            apiResponse.setData("Logout successful for user with id " + id);
+        } catch (Exception exc) {
+            apiResponse.setError(exc.getMessage());
+        }
+        return apiResponse;
+    }
 }
 
 
