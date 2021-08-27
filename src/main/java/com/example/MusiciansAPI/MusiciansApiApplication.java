@@ -2,6 +2,7 @@ package com.example.MusiciansAPI;
 
 import com.example.MusiciansAPI.model.Role;
 import com.example.MusiciansAPI.repository.RoleRepository;
+import com.example.MusiciansAPI.repository.UserRepository;
 import com.example.MusiciansAPI.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -21,8 +22,10 @@ public class MusiciansApiApplication {
 	}
 
 	@Bean
-	CommandLineRunner runner(RoleRepository roleRepository) {
+	CommandLineRunner runner(RoleRepository roleRepository, UserRepository userRepository ) {
 		return args -> {
+			//Delete users from repo if there are any left from previous run (Thank you Ryan Desmond)
+			userRepository.deleteAll();
 			//Delete roles from repo if there are any left from previous run (Thank you Ryan Desmond)
 			roleRepository.deleteAll();
 			//Save roles at runtime
