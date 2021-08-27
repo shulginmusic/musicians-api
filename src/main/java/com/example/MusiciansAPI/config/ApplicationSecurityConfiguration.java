@@ -92,7 +92,8 @@ public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdap
                 .and()
                 .authorizeRequests()
                 .antMatchers("/",
-                        "/api/auth/**"
+                        "/api/auth/**",
+                        "/test-advice"
                         )
                 .permitAll()
                 .antMatchers( "/api/protected/**")

@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
 
-
 import javax.validation.Valid;
 
 
@@ -91,6 +90,11 @@ public class AuthenticationController {
             apiResponse.setError(exc.getMessage());
         }
         return apiResponse;
+    }
+
+    @GetMapping("/test-advice")
+    public void testAdvice() throws Exception {
+        throw new Exception("Advice tested");
     }
 }
 

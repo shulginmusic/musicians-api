@@ -1,6 +1,5 @@
 package com.example.MusiciansAPI.service;
 
-import com.example.MusiciansAPI.exception.AppException;
 import com.example.MusiciansAPI.model.Role;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.LoginRequest;
@@ -62,7 +61,7 @@ public class UserService {
 
         //Set user role
         Role userRole = roleRepository.findByName(Role.RoleName.ROLE_USER)
-                .orElseThrow(() -> new AppException("No user role set"));
+                .orElseThrow(() -> new Exception("No user role set"));
         user.setRoles(Collections.singleton(userRole));
 
         //Save user in repo

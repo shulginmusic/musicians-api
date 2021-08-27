@@ -18,6 +18,7 @@ public class MusiciansApiApplication {
 	@Bean
 	CommandLineRunner runner(RoleRepository roleRepository) {
 		return args -> {
+			//Save roles at runtime
 			Role userRole = new Role(Role.RoleName.ROLE_USER);
 			Role adminRole = new Role(Role.RoleName.ROLE_ADMIN);
 
