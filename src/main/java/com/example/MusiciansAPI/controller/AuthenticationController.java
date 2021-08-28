@@ -1,6 +1,6 @@
 package com.example.MusiciansAPI.controller;
 
-import com.example.MusiciansAPI.model.APIResponse;
+import com.example.MusiciansAPI.payload.request.response.APIResponse;
 import com.example.MusiciansAPI.model.User;
 import com.example.MusiciansAPI.payload.request.LoginRequest;
 import com.example.MusiciansAPI.payload.request.RegistrationRequest;

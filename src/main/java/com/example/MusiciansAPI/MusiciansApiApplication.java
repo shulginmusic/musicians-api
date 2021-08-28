@@ -22,18 +22,17 @@ public class MusiciansApiApplication {
 	}
 
 	@Bean
-	CommandLineRunner runner(RoleRepository roleRepository, UserRepository userRepository ) {
+	CommandLineRunner runner(RoleRepository roleRepository, UserRepository userRepository) {
 		return args -> {
-			//Delete users from repo if there are any left from previous run (Thank you Ryan Desmond)
-			userRepository.deleteAll();
-			//Delete roles from repo if there are any left from previous run (Thank you Ryan Desmond)
-			roleRepository.deleteAll();
-			//Save roles at runtime
-			Role userRole = new Role(Role.RoleName.ROLE_USER);
-			Role adminRole = new Role(Role.RoleName.ROLE_ADMIN);
+			//Leave this permanently
+			if (roleRepository.findAll().size() == 0) {
+				//Save roles at runtime
+				Role userRole = new Role(Role.RoleName.ROLE_USER);
+				Role adminRole = new Role(Role.RoleName.ROLE_ADMIN);
 
-			roleRepository.save(userRole);
-			roleRepository.save(adminRole);
+				roleRepository.save(userRole);
+				roleRepository.save(adminRole);
+			}
 		};
 	}
 

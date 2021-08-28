@@ -160,6 +160,16 @@ public class UserService {
         return userInResponse;
     }
 
+    //Repo Getter methods
+    public User getUserByUsername(String username) throws Exception {
+        checkIfExistsByUsername(username);
+        return userRepository.findByUsername(username).get();
+    }
+    public User getUserByUsernameOrEmail(String usernameOrEmail) throws Exception {
+        checkIfExistsByUsernameOrEmail(usernameOrEmail);
+        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).get();
+    }
+
     //Helper Methods
 
     private void checkIfUsernameTaken(String username) throws Exception {
@@ -174,11 +184,15 @@ public class UserService {
         }
     }
 
-    //Repo Getter methods
-    public User getUserByUsername(String username) {
-        return userRepository.findByUsername(username).get();
+    private void checkIfExistsByUsernameOrEmail(String usernameOrEmail) throws Exception {
+        if (!userRepository.existsByUsernameOrEmail(usernameOrEmail, usernameOrEmail)) {
+            throw new Exception("User " + usernameOrEmail + " doesn't exist, please register");
+        }
     }
-    public User getUserByUsernameOrEmail(String usernameOrEmail) {
-        return userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail).get();
+
+    private void checkIfExistsByUsername(String username) throws Exception {
+        if (!userRepository.existsByUsername(username)) {
+            throw new Exception("User " + username + " doesn't exist, please register");
+        }
     }
 }

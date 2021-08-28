@@ -1,4 +1,4 @@
-package com.example.MusiciansAPI.model;
+package com.example.MusiciansAPI.payload.request.response;
 
 import lombok.Getter;
 import lombok.Setter;

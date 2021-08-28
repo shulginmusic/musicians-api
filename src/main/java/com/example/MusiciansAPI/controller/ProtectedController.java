@@ -1,6 +1,6 @@
 package com.example.MusiciansAPI.controller;
 
-import com.example.MusiciansAPI.model.APIResponse;
+import com.example.MusiciansAPI.payload.request.response.APIResponse;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
