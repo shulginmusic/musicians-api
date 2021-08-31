@@ -72,7 +72,7 @@ It's time to refresh your access using the access token!
 
 * This will delete any refresh tokens currently in the DB associated with the user
 
-#Credits 
+# Credits 
 
 A HUGE thank you to the following awesome people and their tutorials that helped me navigate the world of JWT and create this project
 
