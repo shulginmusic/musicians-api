@@ -94,6 +94,7 @@ public class AuthenticationController {
 
 }
 
+//TODO: JWT payload - add more data perhaps?
 
 
 
