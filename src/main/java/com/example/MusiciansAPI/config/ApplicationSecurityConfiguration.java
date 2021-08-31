@@ -1,12 +1,9 @@
 package com.example.MusiciansAPI.config;
 
-import com.example.MusiciansAPI.exception.Advice;
-import com.example.MusiciansAPI.security.FilterExceptionHandler;
 import com.example.MusiciansAPI.service.CustomUserDetailsService;
 import com.example.MusiciansAPI.security.JwtAuthenticationEntryPoint;
 import com.example.MusiciansAPI.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -14,15 +11,12 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.context.support.WebApplicationContextUtils;
-import org.springframework.web.servlet.HandlerExceptionResolver;
 
 //REFERENCE: https://www.callicoder.com/series/spring-security-react/
 
@@ -84,7 +78,10 @@ public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdap
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        //H2 Console access
+        http.authorizeRequests().antMatchers("/h2-console/**").permitAll()
+                .and().csrf().ignoringAntMatchers("/h2-console/**")
+                .and().headers().frameOptions().sameOrigin();
 
         http
                 .csrf().disable()
@@ -103,7 +100,8 @@ public class ApplicationSecurityConfiguration  extends WebSecurityConfigurerAdap
                 .hasRole("USER")
                 .anyRequest()
                 .authenticated();
-
+        
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
 
