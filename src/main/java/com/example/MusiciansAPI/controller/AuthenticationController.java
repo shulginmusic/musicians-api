@@ -80,7 +80,7 @@ public class AuthenticationController {
         return apiResponse;
     }
 
-    @PostMapping("/logout/{id}")
+    @PostMapping("/logout/{id}") //TODO:UserNotFound exception
     public APIResponse<String> logoutUser(@PathVariable long id) {
         var apiResponse = new APIResponse<String>();
         try {
@@ -92,10 +92,6 @@ public class AuthenticationController {
         return apiResponse;
     }
 
-    @GetMapping("/test-advice")
-    public void testAdvice() throws Exception {
-        throw new Exception("Advice tested");
-    }
 }
 
 

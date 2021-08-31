@@ -16,12 +16,13 @@ import java.io.IOException;
 
 //REFERENCE: https://www.callicoder.com/series/spring-security-react/
 
+//Handle Unathorized requests
 @Component
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Autowired
     @Qualifier("handlerExceptionResolver")
-    HandlerExceptionResolver exceptionResolver;
+    HandlerExceptionResolver exceptionResolver; //Handle filter-level exceptions
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationEntryPoint.class);
 

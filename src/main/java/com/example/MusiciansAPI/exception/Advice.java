@@ -10,6 +10,12 @@ import javax.servlet.http.HttpServletResponse;
 @RestControllerAdvice
 public class Advice {
 
+    /**
+     * Handle Autentication exceptions thrown by the app's filters (in this case JwtAuthenticationFilter)
+     * @param exc
+     * @param response
+     * @return
+     */
     @ExceptionHandler(value = AuthenticationException.class)
     public APIResponse<?> handleExpiredException(AuthenticationException exc, HttpServletResponse response) {
         APIResponse<?> apiResponse = new APIResponse<>();
