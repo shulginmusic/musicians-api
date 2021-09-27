@@ -82,7 +82,7 @@ A HUGE thank you to the following awesome people and their tutorials that helped
 
 # Disclaimer
 
-This application is an exploration of JWT Auth and Spring Security, and should not be used in a professional setting unless it's heavily tested and modified to ensure the security of a project.
+This application is an exploration of JWT Auth and Spring Security, and should not be used in a professional setting. If used as a reference, it should be heavily tested and modified to ensure the security of a project.
 
 # Got Questions? Contact me!
 efim@shulginmusic.com
