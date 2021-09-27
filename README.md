@@ -80,5 +80,9 @@ A HUGE thank you to the following awesome people and their tutorials that helped
 * https://www.callicoder.com/series/spring-security-react/
 * Coding Nomads (special thanks to Ryan and Jared)
 
+# Disclaimer
+
+This application is an exploration of JWT Auth and Spring Security, and should not be used in a professional setting unless it's heavily tested and modified to ensure the security of a project.
+
 # Got Questions? Contact me!
 efim@shulginmusic.com
